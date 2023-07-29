@@ -33,7 +33,7 @@ impl Block {
     }
     
     pub fn new_block(data: String, pre_block_hash: String, height: usize) -> Result<Block> {
-        let timestamp = SystemTime::now()
+        let timestamp = SystemTime::now();
         let mut block = Block {
             timestamp: timestamp,
             transaction: data,
@@ -54,7 +54,7 @@ impl Block {
             TARGET_HEXT,
             self.nonce,
         );
-        let bytes:<Vec<u8>> = bincode::serialize(&content)?;
+        let bytes = bincode::serialize(&content)?;
         Ok(bytes)
     }
 
@@ -74,7 +74,7 @@ impl Block {
         }
         let data = self.prepare_hash_data()?;
         let mut hasher = Sha256::new();
-        hasher.input(&data[..])
+        hasher.input(&data[..]);
         self.hash = hasher.result_str();
         Ok(())
     }
@@ -96,7 +96,7 @@ impl Blockchain {
     }
 }
 
-#cfg[(test)]
+#[cfg(test)]
 mod tests{
     use super::*;
 
