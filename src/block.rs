@@ -1,43 +1,46 @@
-use std::time::SystemTime;
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
 use log::info;
+use std::time::SystemTime;
 
 pub type Result<T> = std::result::Result<T, failure::Error>;
 
 const TARGET_HEXT: usize = 4;
 
+// Allows .clone() for the Block struct
 #[derive(Debug, Clone)]
 pub struct Block {
-    timestamp: u128,        // Time when block is created
-    transaction: String,    //
-    pre_block_hash: String, //
-    hash: String,           //
-    height: usize,          //
-    nonce: i32,             //
+    timestamp: u128,         // Time when block is created
+    transactions: String,    //
+    prev_block_hash: String, //
+    hash: String,            //
+    height: usize,           //
+    nonce: i32,              //
 }
-#[derive(Debug)]
 
+// Allows using println!("{:?}", some_block) for debugging
+#[derive(Debug)]
 pub struct Blockchain {
     blocks: Vec<Block>,
 }
 
 impl Block {
-    
     pub fn get_hash(&self) -> String {
         self.hash.clone()
     }
 
-    pub fn new_genesis_block(data: String, pre_block_hash: String, height: usize) -> Block {
+    pub fn new_genesis_block() -> Block {
         Block::new_block(String::from("Gensis Block"), String::new(), 0).unwrap()
     }
-    
-    pub fn new_block(data: String, pre_block_hash: String, height: usize) -> Result<Block> {
-        let timestamp = SystemTime::now();
+
+    pub fn new_block(data: String, prev_block_hash: String, height: usize) -> Result<Block> {
+        let timestamp = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)?
+            .as_millis();
         let mut block = Block {
             timestamp: timestamp,
-            transaction: data,
-            pre_block_hash,
+            transactions: data,
+            prev_block_hash,
             hash: String::new(),
             height,
             nonce: 0,
@@ -78,26 +81,25 @@ impl Block {
         self.hash = hasher.result_str();
         Ok(())
     }
-
 }
 
 impl Blockchain {
     pub fn new() -> Blockchain {
         Blockchain {
-            blocks: vec![Block::new_genesis_block()]
+            blocks: vec![Block::new_genesis_block()],
         }
     }
-    
-    pub fn add_block(&mut self, data: String ) -> Result<()> {
+
+    pub fn add_block(&mut self, data: String) -> Result<()> {
         let prev = self.blocks.last().unwrap();
-        let new_block = Block::new_block(data, prev.get_hash(), TARGET_HEXT);
+        let new_block = Block::new_block(data, prev.get_hash(), TARGET_HEXT)?;
         self.blocks.push(new_block);
         Ok(())
     }
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
@@ -106,5 +108,6 @@ mod tests{
         b.add_block("data".to_string());
         b.add_block("data2".to_string());
         b.add_block("data3".to_string());
+        dbg!(b);
     }
 }

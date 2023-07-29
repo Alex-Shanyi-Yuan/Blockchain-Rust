@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/target/debug/Blockchain-Rust",
+            "program": "${workspaceFolder}/target/debug/blockchain-rust",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
