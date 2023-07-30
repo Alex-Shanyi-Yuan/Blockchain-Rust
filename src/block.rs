@@ -1,27 +1,22 @@
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
 use log::info;
+use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
-pub type Result<T> = std::result::Result<T, failure::Error>;
+use crate::errors::Result;
 
 const TARGET_HEXT: usize = 4;
 
 // Allows .clone() for the Block struct
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Block {
     timestamp: u128,         // Time when block is created
-    transactions: String,    //
-    prev_block_hash: String, //
-    hash: String,            //
+    transactions: String,    // data
+    prev_block_hash: String, // prev hash as blockchain works as linkedlist
+    hash: String,            // block id
     height: usize,           //
-    nonce: i32,              //
-}
-
-// Allows using println!("{:?}", some_block) for debugging
-#[derive(Debug)]
-pub struct Blockchain {
-    blocks: Vec<Block>,
+    nonce: i32,              // used to update hash function to get different hash keys
 }
 
 impl Block {
@@ -29,6 +24,23 @@ impl Block {
         self.hash.clone()
     }
 
+    pub fn get_prev_hash(&self) -> String {
+        self.prev_block_hash.clone()
+    }
+
+    pub fn get_timestamp(&self) -> u128 {
+        self.timestamp.clone()
+    }
+
+    pub fn get_transactions(&self) -> String {
+        self.transactions.clone()
+    }
+
+    pub fn get_height(&self) -> usize {
+        self.height.clone()
+    }
+
+    // creates initial block of block chain
     pub fn new_genesis_block() -> Block {
         Block::new_block(String::from("Gensis Block"), String::new(), 0).unwrap()
     }
@@ -49,6 +61,7 @@ impl Block {
         Ok(block)
     }
 
+    // take charateristics of block and serialize
     fn prepare_hash_data(&self) -> Result<Vec<u8>> {
         let content = (
             self.prev_block_hash.clone(),
@@ -61,6 +74,7 @@ impl Block {
         Ok(bytes)
     }
 
+    // diffcaulty check
     fn validate(&self) -> Result<bool> {
         let data: Vec<u8> = self.prepare_hash_data()?;
         let mut hasher = Sha256::new();
@@ -70,6 +84,7 @@ impl Block {
         Ok(&hasher.result_str()[0..TARGET_HEXT] == String::from_utf8(vec1)?)
     }
 
+    // establish the block
     fn run_proof_if_work(&mut self) -> Result<()> {
         info!("Mining the block");
         while !self.validate()? {
@@ -80,34 +95,5 @@ impl Block {
         hasher.input(&data[..]);
         self.hash = hasher.result_str();
         Ok(())
-    }
-}
-
-impl Blockchain {
-    pub fn new() -> Blockchain {
-        Blockchain {
-            blocks: vec![Block::new_genesis_block()],
-        }
-    }
-
-    pub fn add_block(&mut self, data: String) -> Result<()> {
-        let prev = self.blocks.last().unwrap();
-        let new_block = Block::new_block(data, prev.get_hash(), TARGET_HEXT)?;
-        self.blocks.push(new_block);
-        Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_blockchain() {
-        let mut b = Blockchain::new();
-        b.add_block("data".to_string());
-        b.add_block("data2".to_string());
-        b.add_block("data3".to_string());
-        dbg!(b);
     }
 }
