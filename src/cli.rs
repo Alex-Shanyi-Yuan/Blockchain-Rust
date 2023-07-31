@@ -15,6 +15,8 @@ impl Cli {
     }
 
     pub fn run(&mut self) -> Result<()> {
+        println!("Welcome to Blockchain CLI");
+        
         let matches = Command::new("Blockchain-Rust-App")
             .version("0.1.0")
             .author("alexyuan150298224@gmail.com")

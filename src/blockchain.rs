@@ -7,8 +7,8 @@ const TARGET_HEXT: usize = 4;
 #[derive(Debug, Clone)]
 // acts as reversed linkedlist
 pub struct Blockchain {
-    current_hash: String,
-    db: sled::Db,
+    pub current_hash: String,
+    pub db: sled::Db,
 }
 pub struct BlockchainIter<'a> {
     current_hash: String,
