@@ -16,7 +16,7 @@ impl Cli {
 
     pub fn run(&mut self) -> Result<()> {
         println!("Welcome to Blockchain CLI");
-        
+
         let matches = Command::new("Blockchain-Rust-App")
             .version("0.1.0")
             .author("alexyuan150298224@gmail.com")
@@ -31,7 +31,7 @@ impl Cli {
 
         if let Some(ref matches) = matches.subcommand_matches("addblock") {
             if let Some(c) = matches.get_one::<String>("DATA") {
-                self.bc.add_block(String::from(c))?;
+                self.bc.add_block(vec![])?;
             } else {
                 println!("Missing input arg: DATA");
             }

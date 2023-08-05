@@ -5,18 +5,19 @@ use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
 use crate::errors::Result;
+use crate::transaction::Transaction;
 
 const TARGET_HEXT: usize = 4;
 
 // Allows .clone() for the Block struct
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Block {
-    timestamp: u128,         // Time when block is created
-    transactions: String,    // data
-    prev_block_hash: String, // prev hash as blockchain works as linkedlist
-    hash: String,            // block id
-    height: usize,           //
-    nonce: i32,              // used to update hash function to get different hash keys
+    timestamp: u128,                // Time when block is created
+    transactions: Vec<Transaction>, // data
+    prev_block_hash: String,        // prev hash as blockchain works as linkedlist
+    hash: String,                   // block id
+    height: usize,                  //
+    nonce: i32,                     // used to update hash function to get different hash keys
 }
 
 impl Block {
@@ -32,8 +33,8 @@ impl Block {
         self.timestamp.clone()
     }
 
-    pub fn get_transactions(&self) -> String {
-        self.transactions.clone()
+    pub fn get_transactions(&self) -> &Vec<Transaction> {
+        &self.transactions
     }
 
     pub fn get_height(&self) -> usize {
@@ -41,11 +42,15 @@ impl Block {
     }
 
     // creates initial block of block chain
-    pub fn new_genesis_block() -> Block {
-        Block::new_block(String::from("Gensis Block"), String::new(), 0).unwrap()
+    pub fn new_genesis_block(coinbase: Transaction) -> Block {
+        Block::new_block(vec![coinbase], String::new(), 0).unwrap()
     }
 
-    pub fn new_block(data: String, prev_block_hash: String, height: usize) -> Result<Block> {
+    pub fn new_block(
+        data: Vec<Transaction>,
+        prev_block_hash: String,
+        height: usize,
+    ) -> Result<Block> {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)?
             .as_millis();
